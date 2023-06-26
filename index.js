@@ -1,62 +1,36 @@
 //Server File
-import {createRequire} from 'module';
-const require = createRequire(import.meta.url);
+import { createRequire } from 'module';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const fs = require('fs');
-const http = require('http');
+const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const express = require('express');
+const path = require('path');
+const app = express();
 const PORT = 8080;
 
-http.createServer((req, res) => {
-    const myURL = new URL(req.url, "http://localhost");
-    let filename = "." + myURL.pathname;
+app.use(express.static(path.join(__dirname, '')));
 
-    if(filename === "./"){
-        filename = "./index.html"
-    }
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '404.html'));
+})
 
-    fs.access(filename, fs.constants.F_OK, (err) => {
-        if (err) {
-            fs.readFile('./404.html', 'utf-8', (error, errorPageData) => {
-                if (error){
-                    res.writeHead(500);
-                    res.end();
-                } else {
-                    res.writeHead(404, {'Content-Type' : 'text/html'});
-                    res.write(errorPageData);
-                    res.end();
-                }
-            });
-        } else {
-            fs.readFile(filename, 'utf-8', (error, data) => {
-                if (error){
-                    res.writeHead(500);
-                    res.end();
-                } else {
-                    res.writeHead(200, {'Content-Type' : 'text/html'});
-                    res.write(data);
-                    res.end();
-                }
-            })
-        }
-    });
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+})
 
-    // fs.readFile(filename, 'utf-8', (err, data) => {
-    //     if (err){
-    //         // res.writeHead(500);
-    //         // return res.end();
-    //         fs.readFile('./404.html', 'utf-8', (error, errorPageData) => {
-    //             if(error){
-    //                 res.writeHead(500);
-    //                 return res.end();
-    //             } else {
-    //                 res.writeHead(404, {'Content-Type': 'text/html'});
-    //                 res.write(errorPageData);
-    //                 res.end();
-    //             }
-    //         })
-    //     }
-    //     res.writeHead(200, {'Content-Type': 'text/html'});
-    //     res.write(data);
-    //     res.end();
-    // })
-}).listen(PORT)
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'about.html'));
+})
+
+app.get('/contact-me', (req, res) => {
+    res.sendFile(path.join(__dirname, 'contact-me.html'));
+})
+
+
+app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+})
